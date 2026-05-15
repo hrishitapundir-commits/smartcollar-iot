@@ -34,11 +34,14 @@ if __name__ == "__main__":
     while True:
         for cid in cattle_ids:
             data = generate_data(cid)
-            try:
-                resp = requests.post(API_URL, json=data, timeout=5)
-                print(f"Sent → {cid}: status={resp.status_code}")
-            except Exception as e:
-                print("Error sending data:", e)
+            for attempt in range(3):
+                try:
+                    resp = requests.post(API_URL, json=data, timeout=5)
+                    print(f"Sent → {cid}: status={resp.status_code}")
+                    break
+                except Exception as e:
+                    print(f"Attempt {attempt+1} failed: {e}. Retrying in 3 seconds...")
+                    time.sleep(3)
         time.sleep(args.interval)
 
 
