@@ -10,6 +10,8 @@ class CattleData(BaseModel):
     heart_rate: int
     movement: str
     battery_level: int
+    latitude: float
+    longitude: float
 
 # temporary in-memory database
 database = []
@@ -20,5 +22,10 @@ def ingest_data(data: CattleData):
     return {"status": "success", "received": data.dict()}
 
 @app.get("/data")
-def get_all_data():
-    return {"count": len(database), "data": database}
+def get_all_data(limit: int = 50):
+    return {"count": len(database[-limit:]), "data": database[-limit:]}
+
+@app.get("/cattle/{device_id}")
+def get_cattle_data(device_id: str):
+    cattle_records = [d for d in database if f["device_id"] == device_id]
+    return{"device_id": device_id, "count": len(cattle_records), "data": cattle_records}
