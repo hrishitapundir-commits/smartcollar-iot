@@ -27,9 +27,18 @@ class CattleData(BaseModel):
 @app.post("/ingest-data")
 def ingest_data(data: CattleData):
     record = data.dict()
+
+    #Alert logic
+    record["alert"] = False
+    record["alert_reason"] = None
+
+    if data.temperature > 39.5:
+        record["alert"] = True
+        record["alert_reason"] = f"High temperature: {data.temperature}°C"
+
     collection.insert_one(record)
     record.pop("_id", None)
-    return {"status": "success", "received": record}
+    return {"status": "success", "received": record}    
 
 @app.get("/data")
 def get_all_data(limit: int = 50):
@@ -40,3 +49,8 @@ def get_all_data(limit: int = 50):
 def get_cattle_data(device_id: str):
     records = list(collection.find({"device_id": device_id}, {"_id": 0}))
     return {"device_id": device_id, "count": len(records), "data": records}
+
+@app.get("/alerts")
+def get_alerts():
+    alerts = list(collection.find({"alert": True}, {"_id": 0}))
+    return {"count": len(alerts), "alerts": alerts}
