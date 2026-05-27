@@ -1,7 +1,17 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = FastAPI()
+
+#MongoDB connection
+client = MongoClient(os.getenv("MONGO_URI"))
+db = client["smartcollar"]
+collection = db["cattle_readings"]
 
 class CattleData(BaseModel):
     timestamp: str
@@ -14,19 +24,19 @@ class CattleData(BaseModel):
     latitude: float
     longitude: float
 
-# temporary in-memory database
-database = []
-
 @app.post("/ingest-data")
 def ingest_data(data: CattleData):
-    database.append(data.dict())
-    return {"status": "success", "received": data.dict()}
+    record = data.dict()
+    collection.insert_one(record)
+    record.pop("_id", None)
+    return {"status": "success", "received": record}
 
 @app.get("/data")
 def get_all_data(limit: int = 50):
-    return {"count": len(database[-limit:]), "data": database[-limit:]}
+    records = list(collection.find({}, {"_id": 0}).sort("timestamp", -1).limit(limit))
+    return {"count": len(records), "data": records}
 
 @app.get("/cattle/{device_id}")
 def get_cattle_data(device_id: str):
-    cattle_records = [d for d in database if d["device_id"] == device_id]
-    return{"device_id": device_id, "count": len(cattle_records), "data": cattle_records}
+    records = list(collection.find({"device_id": device_id}, {"_id": 0}))
+    return {"device_id": device_id, "count": len(records), "data": records}
