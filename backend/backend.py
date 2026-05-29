@@ -61,3 +61,17 @@ def get_cattle_data(device_id: str):
 def get_alerts():
     alerts = list(alerts_collection.find({}, {"_id": 0}).sort("timestamp",-1))
     return {"count": len(alerts), "alerts": alerts}
+
+@app.get("/summary")
+def get_summary():
+    pipeline = [
+        {"$sort": {"timestamp": -1}},
+        {"$group": {
+            "_id": "$device_id",
+            "latest": {"$first": "$$ROOT"}
+        }},
+        {"$replaceRoot": {"newRoot": "$latest"}},
+        {"$project": {"_id": 0}}
+    ]
+    summary = list(collection.aggregate(pipeline))
+    return {"count": len(summary), "summary": summary}
