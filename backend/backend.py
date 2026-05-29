@@ -12,6 +12,7 @@ app = FastAPI()
 client = MongoClient(os.getenv("MONGO_URI"))
 db = client["smartcollar"]
 collection = db["cattle_readings"]
+alerts_collection = db["alerts"]
 
 class CattleData(BaseModel):
     timestamp: str
@@ -32,9 +33,15 @@ def ingest_data(data: CattleData):
     record["alert"] = False
     record["alert_reason"] = None
 
-    if data.temperature > 39.5:
+    if data.temperature > 40.0:
         record["alert"] = True
         record["alert_reason"] = f"High temperature: {data.temperature}°C"
+        alerts_collection.insert_one({
+            "device_id": data.device_id,
+            "timestamp": data.timestamp,
+            "temperature": data.temperature,
+            "message": f"Fever alert: {data.temperature}°C"
+        })
 
     collection.insert_one(record)
     record.pop("_id", None)
@@ -52,5 +59,5 @@ def get_cattle_data(device_id: str):
 
 @app.get("/alerts")
 def get_alerts():
-    alerts = list(collection.find({"alert": True}, {"_id": 0}))
+    alerts = list(alerts_collection.find({}, {"_id": 0}).sort("timestamp",-1))
     return {"count": len(alerts), "alerts": alerts}
