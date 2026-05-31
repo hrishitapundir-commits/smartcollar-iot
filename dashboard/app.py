@@ -80,8 +80,24 @@ st.subheader(" Recent Fever Alerts")
 
 if alerts: 
     df_alerts = pd.DataFrame(alerts[:10])[["device_id", "timestamp", "temperature", "message"]]
-    df_alers.columns = ["Device ID", "Timestamp", "Temperature(°C)", "Message"]
+    df_alerts.columns = ["Device ID", "Timestamp", "Temperature(°C)", "Message"]
     st.dataframe(df_alerts, use_container_width=True)
 else:
     st.success("No active alerts!")
-                                          
+                                        
+# Individual cattle view
+st.subheader(" Drill Down by Cattle")
+
+if summary:
+    device_ids = [c["device_id"] for c in summary]
+    selected = st.selectbox("Select a Cattle ID", device_ids)
+
+    data = fetch_cattle_data(selected)
+
+    if data:
+        df_individual = pd.DataFrame(data)[["timestamp", "temperature"]]
+        df_individual = df_individual.sort_values("timestamp")
+        df_individual["fever_threshold"] = 40.0
+
+        st.line_chart(df_individual.set_index("timestamp")[["temperature","fever_threshold"]]) 
+        
