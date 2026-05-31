@@ -12,6 +12,8 @@ API_URL = "http://127.0.0.1:8000"
 # Page config
 st.set_page_config(page_title="Smart Cattle Monitor", layout="wide")
 st.title(" Smart Cattle Monitoring Dashboard")
+st.caption("Real-time health monitoring for livestock using IoT collar sensors")
+st.caption(f"Last refreshed: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 # Fetch summary data from backend
 def fetch_summary():
@@ -78,6 +80,13 @@ if summary:
 
 else:
     st.warning("No data available. Make sure the backend is running.")
+
+# Map view - cattle GPS positions
+st.subheader(" Cattle Location Map")
+
+if summary:
+    df_map = pd.DataFrame(summary)[["latitude", "longitude", "device_id"]]
+    st.map(df_map)
 
 # Temperature chart per cattle
 st.subheader("Temperature History")
