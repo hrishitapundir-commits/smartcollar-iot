@@ -1,10 +1,10 @@
 import streamlit as st
 import requests
 import pandas as pd
-from streamlit_autorefresh import st_autorefresh
+from streamlit_autorefresh import st_autorefresh    
 
 # Auto-refresh every 10 seconds
-st_autorefresh(interval=10000, key="autofresh")
+st_autorefresh(interval=5000, key="autofresh")
 
 # Backend API URL
 API_URL = "http://127.0.0.1:8000"
@@ -33,6 +33,15 @@ def fetch_alerts():
 summary = fetch_summary()
 alerts = fetch_alerts()
 
+# Sidebar - Recent Alerts
+with st.sidebar:
+    st.header(" Recent Alerts")
+    if alerts:
+        for alert in alerts[:5]:
+            st.warning(f"**{alert['device_id']}** - {alert['temperature']}°C at {alert['timestamp']}")
+    else:
+        st.success("No active alerts!")       
+
 # Metrics cards at the top
 col1, col2, col3 = st.columns(3)
 
@@ -54,8 +63,19 @@ st.subheader("Latest Readings per Cattle")
 
 if summary:
     df = pd.DataFrame(summary)[["device_id", "temperature", "heart_rate", "activity", "battery_level", "timestamp"]]
-    df.columns = ["Device ID", "Temperature(°C)", "Heart Rate", "Activity", "Battery %", "Last Updated"]
-    st.dataframe(df, use_container_width=True)
+    df.columns = ["Device ID", "Temperature (°C)", "Heart Rate", "Activity", "Battery %", "Last Updated"]
+
+    def color_battery(val):
+        if val > 50:
+            color = "green"
+        elif val >= 20:
+            color = "orange"
+        else:
+            color = "red"
+        return f"color: {color}"
+    styled_df = df.style.map(color_battery, subset=["Battery %"])
+    st.dataframe(styled_df, use_container_width=True)
+
 else:
     st.warning("No data available. Make sure the backend is running.")
 
