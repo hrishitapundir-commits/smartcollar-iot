@@ -1,6 +1,10 @@
 import streamlit as st
 import requests
 import pandas as pd
+from streamlit_autorefresh import st_autorefresh
+
+# Auto-refresh every 10 seconds
+st_autorefresh(interval=10000, key="autofresh")
 
 # Backend API URL
 API_URL = "http://127.0.0.1:8000"
@@ -16,7 +20,7 @@ def fetch_summary():
         return response.json()["summary"]
     except:
         return[]
-    
+
 # Fetch alerts from backend 
 def fetch_alerts():
     try:
@@ -100,4 +104,4 @@ if summary:
         df_individual["fever_threshold"] = 40.0
 
         st.line_chart(df_individual.set_index("timestamp")[["temperature","fever_threshold"]]) 
-        
+
