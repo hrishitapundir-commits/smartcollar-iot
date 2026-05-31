@@ -54,3 +54,34 @@ if summary:
     st.dataframe(df, use_container_width=True)
 else:
     st.warning("No data available. Make sure the backend is running.")
+
+# Temperature chart per cattle
+st.subheader("Temperature History")
+
+def fetch_cattle_data(device_id):
+    try:
+        response = requests.get(f"{API_URL}/cattle/{device_id}")
+        return response.json()["data"]
+    except:
+        return[]
+    
+if summary:
+    for cattle in summary:
+        device_id = cattle["device_id"]
+        data = fetch_cattle_data(device_id)
+        if data:
+            df_temp = pd.DataFrame(data)[["timestamp", "temperature"]]
+            df_temp = df_temp.sort_values("timestamp")
+            st.write(f"**{device_id}**")
+            st.line_chart(df_temp.set_index("timestamp")["temperature"])
+
+# Alerts section
+st.subheader(" Recent Fever Alerts")
+
+if alerts: 
+    df_alerts = pd.DataFrame(alerts[:10])[["device_id", "timestamp", "temperature", "message"]]
+    df_alers.columns = ["Device ID", "Timestamp", "Temperature(°C)", "Message"]
+    st.dataframe(df_alerts, use_container_width=True)
+else:
+    st.success("No active alerts!")
+                                          
