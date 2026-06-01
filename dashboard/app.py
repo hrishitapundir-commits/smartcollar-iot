@@ -7,7 +7,7 @@ from streamlit_autorefresh import st_autorefresh
 st_autorefresh(interval=5000, key="autofresh")
 
 # Backend API URL
-API_URL = "http://127.0.0.1:8000"
+API_URL = "https://web-production-9816e7.up.railway.app"
 
 # Page config
 st.set_page_config(page_title="Smart Cattle Monitor", layout="wide")
