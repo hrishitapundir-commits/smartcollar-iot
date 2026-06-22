@@ -28,7 +28,7 @@ smartcollar-iot/
 ├── Procfile          # Railway deployment config
 
 └── requirements.txt  # Python dependencies
-## ⚙️ Features
+##  Features
 - Simulates real-time sensor data (temperature, heart rate, GPS, activity) for multiple cattle
 - REST API with 5 endpoints for data ingestion, retrieval, alerts, and summaries
 - Automatic fever detection — flags readings above 40°C and stores alerts separately
@@ -36,7 +36,7 @@ smartcollar-iot/
 - Live Streamlit dashboard with auto-refresh, GPS map, temperature charts, and color-coded battery levels
 - Deployed backend accessible via public URL
 
-## 🚀 API Endpoints
+##  API Endpoints
 | Endpoint | Method | Description |
 |---|---|---|
 | `/ingest-data` | POST | Receive and store sensor data |
@@ -45,7 +45,7 @@ smartcollar-iot/
 | `/alerts` | GET | All fever alerts |
 | `/summary` | GET | Latest reading per cattle |
 
-## 🏃 Run Locally
+##  Run Locally
 
 **1. Clone the repo**
 ```bash
